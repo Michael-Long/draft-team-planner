@@ -187,7 +187,9 @@ $(document).ready(function() {
         return "<div class=\"col-lg-2 mt-2\">" +
             "<div class=\"card bg-light h-100 pokemonCard Card" + pokemonTeam.length + "\">" +
                 "<div class=\"card-header d-flex justify-content-end\">" +
-                    "<button type=\"button\" class=\"btn-close removeCard\" aria-label=\"Remove Pokemon\">" +
+                    "<button type=\"button\" class=\"close removeCard\" aria-label=\"Remove Pokemon\">" +
+                        "<span aria-hidden=\"true\">&times;</span>" +
+                    "</button>" +
                 "</div>" +
                 "<img class=\"card-img-top\" src=\"" + parseFrontSpriteFromPokemon(pokemonEntry) + "\" alt=\"" + formatDataString(pokemonEntry.name) + " Sprite\">" +
                 "<div class=\"card-footer h-100\">" +
