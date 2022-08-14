@@ -193,7 +193,7 @@ $(document).ready(function() {
                 "</div>" +
                 "<img class=\"card-img-top\" src=\"" + parseFrontSpriteFromPokemon(pokemonEntry) + "\" alt=\"" + formatDataString(pokemonEntry.name) + " Sprite\">" +
                 "<div class=\"card-footer h-100\">" +
-                    "<h3>" + formatDataString(pokemonEntry.name) + "</h3>" +
+                    "<h4>" + formatDataString(pokemonEntry.name) + "</h4>" +
                 "</div>" +
             "</div>" +
         "</div>";
@@ -203,7 +203,7 @@ $(document).ready(function() {
         return "<div class=\"card bg-light\">" +
                 "<img class=\"card-img-top\" src=\"" + parseFrontSpriteFromPokemon(pokemonEntry) + "\" alt=\"" + formatDataString(pokemonEntry.name) + " Sprite\">" +
                 "<div class=\"card-footer\">" +
-                    "<h3>" + formatDataString(pokemonEntry.name) + "</h3>" +
+                    "<h4>" + formatDataString(pokemonEntry.name) + "</h4>" +
                 "</div>" +
             "</div>";
     }
