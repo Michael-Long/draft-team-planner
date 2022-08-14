@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var savedQueryResults = null; // TODO: Need to save species instead of pokemon to maintain evolution data between searches
+    var savedQueryResults = null;
     var currentSearchResults = [];
     var pokemonTeam = [];
     var pokemonTeamEvoTrees = [];
@@ -68,9 +68,10 @@ $(document).ready(function() {
         return pokemon1.id > pokemon2.id;
     }
 
-    function parseEvoTreeFromPokemon(pokemonEntry) {
-        for (var evoChainIndex = 0; evoChainIndex < savedQueryResults.pokemon_v2_evolutionchain.length; ++evoChainIndex) {
-            var evoChain = savedQueryResults.pokemon_v2_evolutionchain[evoChainIndex];
+    function findDataWithIDFromEvoTree(id, evoTrees, dataReturnType) {
+        // Return type: 1 == evoTree, 2 == species, 3 == pokemon
+        for (var evoChainIndex = 0; evoChainIndex < evoTrees.length; ++evoChainIndex) {
+            var evoChain = evoTrees[evoChainIndex];
 
             for (var speciesIndex = 0; speciesIndex < evoChain.pokemon_v2_pokemonspecies.length; ++speciesIndex) {
                 var pokemonSpecies = evoChain.pokemon_v2_pokemonspecies[speciesIndex];
@@ -78,44 +79,18 @@ $(document).ready(function() {
                 for (var pokemonIndex = 0; pokemonIndex < pokemonSpecies.pokemon_v2_pokemons.length; ++pokemonIndex) {
                     var pokemon = pokemonSpecies.pokemon_v2_pokemons[pokemonIndex];
 
-                    if (pokemonEntry.id == pokemon.id)
-                        return evoChain;
-                }
-            }
-        }
-        return null;
-    }
-
-    function findSpeciesFromPokemon(pokemonEntry) {
-        for (var evoChainIndex = 0; evoChainIndex < pokemonTeamEvoTrees.length; ++evoChainIndex) {
-            var evoChain = pokemonTeamEvoTrees[evoChainIndex];
-
-            for (var speciesIndex = 0; speciesIndex < evoChain.pokemon_v2_pokemonspecies.length; ++speciesIndex) {
-                var pokemonSpecies = evoChain.pokemon_v2_pokemonspecies[speciesIndex];
-
-                for (var pokemonIndex = 0; pokemonIndex < pokemonSpecies.pokemon_v2_pokemons.length; ++pokemonIndex) {
-                    var pokemon = pokemonSpecies.pokemon_v2_pokemons[pokemonIndex];
-
-                    if (pokemonEntry.id == pokemon.id)
-                        return pokemonSpecies;
-                }
-            }
-        }
-        return null;
-    }
-
-    function findPokemonFromID(id) {
-        for (var evoChainIndex = 0; evoChainIndex < pokemonTeamEvoTrees.length; ++evoChainIndex) {
-            var evoChain = pokemonTeamEvoTrees[evoChainIndex];
-
-            for (var speciesIndex = 0; speciesIndex < evoChain.pokemon_v2_pokemonspecies.length; ++speciesIndex) {
-                var pokemonSpecies = evoChain.pokemon_v2_pokemonspecies[speciesIndex];
-
-                for (var pokemonIndex = 0; pokemonIndex < pokemonSpecies.pokemon_v2_pokemons.length; ++pokemonIndex) {
-                    var pokemon = pokemonSpecies.pokemon_v2_pokemons[pokemonIndex];
-
-                    if (pokemon.id == id)
-                        return pokemon;
+                    if (id == pokemon.id) {
+                        switch (dataReturnType) {
+                            case 1:
+                                return evoChain;
+                            case 2:
+                                return pokemonSpecies;
+                            case 3:
+                                return pokemon;
+                            default:
+                                return null;
+                        }
+                    }
                 }
             }
         }
@@ -283,11 +258,11 @@ $(document).ready(function() {
             var pokemonEntry = pokemonTeam[teamIndex];
             var origName = pokemonEntry.name;
             addPokemonToMoveLists(pokemonEntry, origName);
-            var speciesEntry = findSpeciesFromPokemon(pokemonEntry);
+            var speciesEntry = findDataWithIDFromEvoTree(pokemonEntry.id, pokemonTeamEvoTrees, 2);
             while (speciesEntry.evolves_from_species_id !== null) {
-                pokemonEntry = findPokemonFromID(speciesEntry.evolves_from_species_id);
+                pokemonEntry = findDataWithIDFromEvoTree(speciesEntry.evolves_from_species_id, pokemonTeamEvoTrees, 3);
                 addPokemonToMoveLists(pokemonEntry, origName);
-                speciesEntry = findSpeciesFromPokemon(pokemonEntry);
+                speciesEntry = findDataWithIDFromEvoTree(pokemonEntry.id, pokemonTeamEvoTrees, 2);
             }
         }
 
@@ -593,10 +568,6 @@ $(document).ready(function() {
             data: JSON.stringify(testData),
             contentType: "application/json",
             success: function(result) {
-                //for (var pokeIndex = 0; pokeIndex < result.data.pokemon_v2_pokemon.length; ++pokeIndex)
-                    //currentSearchResults.push(result.data.pokemon_v2_pokemon[pokeIndex]);
-                //currentSearchResults.sort(sortPokemonByIDAscending);
-                //appendSearchResults();
                 if (result.errors !== undefined) {
                     console.log("Something bad happened. GraphQL couldn't parse JSON.")
                 } else {
@@ -617,7 +588,7 @@ $(document).ready(function() {
             if ($(this).hasClass("searchIndex" + matchIndex)) {
                 $("#pokemonTeam").append(buildTeamCard(currentSearchResults[matchIndex]));
                 pokemonTeam.push(currentSearchResults[matchIndex]);
-                pokemonTeamEvoTrees.push(parseEvoTreeFromPokemon(currentSearchResults[matchIndex]));
+                pokemonTeamEvoTrees.push(findDataWithIDFromEvoTree(currentSearchResults[matchIndex].id, savedQueryResults.pokemon_v2_evolutionchain, 1));
                 updateTeamInfo();
                 break;
             }
