@@ -602,10 +602,10 @@ $(document).ready(function() {
             move: ""
         };
 
-        searchFields.pokemon = $("#pokemonNameSearchField").val().trim().replace(' ','-').replace(/[^a-z0-9]/gi, '').toLowerCase();
-        searchFields.type = $("#typeSearchField").val().trim().replace(' ','-').replace(/[^a-z0-9]/gi, '').toLowerCase();
-        searchFields.ability = $("#abilitySearchField").val().trim().replace(' ','-').replace(/[^a-z0-9]/gi, '').toLowerCase();
-        searchFields.move = $("#moveSearchField").val().trim().replace(' ','-').replace(/[^a-z0-9]/gi, '').toLowerCase();
+        searchFields.pokemon = $("#pokemonNameSearchField").val().trim().replace(' ','-').replace(/[^a-z0-9-]/gi, '').toLowerCase();
+        searchFields.type = $("#typeSearchField").val().trim().replace(' ','-').replace(/[^a-z0-9-]/gi, '').toLowerCase();
+        searchFields.ability = $("#abilitySearchField").val().trim().replace(' ','-').replace(/[^a-z0-9-]/gi, '').toLowerCase();
+        searchFields.move = $("#moveSearchField").val().trim().replace(' ','-').replace(/[^a-z0-9-]/gi, '').toLowerCase();
         if (searchFields.pokemon == "" && searchFields.type == "" && searchFields.ability == "" && searchFields.move == "")
             return;
 
