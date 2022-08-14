@@ -16,6 +16,43 @@ $(document).ready(function() {
         priority: ""
     };
 
+    // Type Effect Chart
+
+    var typeChart = null;
+    var typeChartQuery = {
+        "query": "{" +
+            "pokemon_v2_type {" +
+              "name\n" +
+              "id\n" +
+              "pokemon_v2_typeefficacies {" +
+                "damage_factor\n" +
+                "damage_type_id\n" +
+                "pokemonV2TypeByTargetTypeId {" +
+                  "id\n" +
+                  "name\n" +
+                "}" +
+              "}" +
+            "}" + 
+          "}"
+    };
+
+    $.post({
+        url: "https://beta.pokeapi.co/graphql/v1beta",
+        data: JSON.stringify(typeChartQuery),
+        contentType: "application/json",
+        success: function(result) {
+            if (result.errors !== undefined) {
+                console.log("Something bad happened. GraphQL couldn't parse JSON.")
+            } else {
+                typeChart = result.data.pokemon_v2_type;
+            }
+        },
+        error: function() {
+            console.log("Type Chart failed.");
+        }
+    });
+
+
     // String Manipulation
 
     function formatDataString(string) {
@@ -181,6 +218,39 @@ $(document).ready(function() {
         $("#ActivePokemonSpe").empty();
         $("#ActivePokemonBST").empty();
         $("#ActivePokemonUsefulMoves").empty();
+    }
+
+    function clearTypeChartRow(typeName) {
+        var formattedTypeName = formatDataString(typeName);
+        $("#" + formattedTypeName + "ImmuneList").empty();
+        $("#" + formattedTypeName + "QuadResistList").empty();
+        $("#" + formattedTypeName + "ResistList").empty();
+        $("#" + formattedTypeName + "WeakList").empty();
+        $("#" + formattedTypeName + "QuadWeakList").empty();
+    }
+
+    function fixTypeChartRow(typeName) {
+        var formattedTypeName = formatDataString(typeName);
+
+        var immuneList = $("#" + formattedTypeName + "ImmuneList").text();
+        if (immuneList !== "")
+            $("#" + formattedTypeName + "ImmuneList").text(immuneList.slice(0, -2));
+
+        var quadResistList = $("#" + formattedTypeName + "QuadResistList").text();
+        if (quadResistList !== "")
+            $("#" + formattedTypeName + "QuadResistList").text(quadResistList.slice(0, -2));
+        
+        var resistList = $("#" + formattedTypeName + "ResistList").text();
+        if (resistList !== "")
+            $("#" + formattedTypeName + "ResistList").text(resistList.slice(0, -2));
+
+        var weakList = $("#" + formattedTypeName + "WeakList").text();
+        if (weakList !== "")
+            $("#" + formattedTypeName + "WeakList").text(weakList.slice(0, -2));
+
+        var quadWeakList = $("#" + formattedTypeName + "QuadWeakList").text();
+        if (quadWeakList !== "")
+            $("#" + formattedTypeName + "QuadWeakList").text(quadWeakList.slice(0, -2));
     }
 
     function clearPokemonTeamMoves() {
@@ -402,7 +472,42 @@ $(document).ready(function() {
     }
 
     function updateTypeChart() {
+        for (var typeIndex = 0; typeIndex < 18; ++typeIndex) { // Currently only 18 "official" types
+            var attackingType = typeChart[typeIndex];
+            clearTypeChartRow(attackingType.name);
 
+            for (var teamIndex = 0; teamIndex < pokemonTeam.length; ++teamIndex) {
+                var pokemonEntry = pokemonTeam[teamIndex];
+
+                var typeEffects = [];
+                for (var pokemonTypeIndex = 0; pokemonTypeIndex < pokemonEntry.pokemon_v2_pokemontypes.length; ++pokemonTypeIndex) {
+                    var pokemonType = pokemonEntry.pokemon_v2_pokemontypes[pokemonTypeIndex];
+                    typeEffects.push(attackingType.pokemon_v2_typeefficacies[pokemonType.pokemon_v2_type.id - 1].damage_factor / 100);
+                }
+                var attackingResult = 1;
+                for (var effectIndex = 0; effectIndex < typeEffects.length; ++effectIndex)
+                    attackingResult *= typeEffects[effectIndex];
+
+                switch (attackingResult) {
+                    case 0:
+                        $("#" + formatDataString(attackingType.name) + "ImmuneList").append(formatDataString(pokemonEntry.name) + ", ");
+                        break;
+                    case .25:
+                        $("#" + formatDataString(attackingType.name) + "QuadResistList").append(formatDataString(pokemonEntry.name) + ", ");
+                        break;
+                    case .5:
+                        $("#" + formatDataString(attackingType.name) + "ResistList").append(formatDataString(pokemonEntry.name) + ", ");
+                        break;
+                    case 2:
+                        $("#" + formatDataString(attackingType.name) + "WeakList").append(formatDataString(pokemonEntry.name) + ", ");
+                        break;
+                    case 4:
+                        $("#" + formatDataString(attackingType.name) + "QuadWeakList").append(formatDataString(pokemonEntry.name) + ", ");
+                        break;
+                }
+            }
+            fixTypeChartRow(attackingType.name);
+        }
     }
 
     // Events
