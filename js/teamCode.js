@@ -591,6 +591,14 @@ $(document).ready(function() {
         }
     }
 
+    function clearSearchFields() {
+        $("#searchResults").empty();
+        $("#pokemonNameSearchField").val('');
+        $("#typeSearchField").val('');
+        $("#abilitySearchField").val('');
+        $("#moveSearchField").val('');
+    }
+
     function search() {
         $("#searchResults").empty();
         currentSearchResults.length = 0;
@@ -723,5 +731,6 @@ $(document).ready(function() {
     $("#pokemonTeam").on("click", ".pokemonCard", switchActivePokemon);
     $("#pokemonTeam").on("click", ".removeCard", removePokemonFromTeam);
     $("#basicSearchButton").click(search);
+    $("#clearSearchButton").click(clearSearchFields);
     $("#searchTable").on("click", "tbody tr", addPokemonToTeam);
 });
