@@ -733,4 +733,12 @@ $(document).ready(function() {
     $("#basicSearchButton").click(search);
     $("#clearSearchButton").click(clearSearchFields);
     $("#searchTable").on("click", "tbody tr", addPokemonToTeam);
+
+    $('.searchField').keypress(function (e) {
+        var key = e.which;
+        if (key == 13) {
+            $("#basicSearchButton").click();
+            return false;
+        }
+    });
 });
